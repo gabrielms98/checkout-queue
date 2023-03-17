@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "./App.css";
 
 function App() {
   const lines: string[] = ["a", "b", "c", "d", "e"];
-  const lineSizes: number[] = Array.from({ length: lines.length }, () => 0);
 
   const [quantity, setQuantity] = useState<number>(0);
 
@@ -18,36 +17,26 @@ function App() {
   function addToLine() {
     if (quantity <= 0) return;
 
-    const copy = [...lineItems];
+    setLineItems((prev) => {
+      let leastAmount: number = Infinity;
+      let lineIndex: number | undefined = undefined;
 
-    const minValue = Math.min(...lineSizes);
-    const lineIndex = lineSizes.findIndex((v) => v === minValue);
+      // TODO: use heap instead for better performance
+      prev.forEach((line, i) => {
+        const sum = line.reduce((acc, v) => acc + v, 0);
+        if (sum < leastAmount) {
+          leastAmount = sum;
+          lineIndex = i;
+        }
+      });
 
-    copy[lineIndex].push(quantity);
+      if (!lineIndex) return prev;
 
-    setLineItems(copy);
-  }
-
-  useEffect(() => {
-    lineItems.forEach((line, i) => {
-      lineSizes[i] = line.reduce((acc, v) => acc + v, 0);
+      return prev.map((line, i) =>
+        i === lineIndex ? [...line, quantity] : line
+      );
     });
-
-    const interval = setInterval(() => {
-      const copy = [...lineItems];
-      for (let i = 0; i < copy.length; i++) {
-        if (!copy[i].length) continue;
-
-        if (--copy[i][0] === 0) copy[i].shift();
-
-        lineSizes[i] = copy[i].reduce((acc, v) => acc + v, 0);
-      }
-
-      setLineItems(copy);
-    }, 1000 * 2);
-
-    return () => clearInterval(interval);
-  }, []);
+  }
 
   return (
     <div className="w-screen h-screen flex flex-col justify-center items-center">
@@ -58,9 +47,7 @@ function App() {
           value={quantity}
           onChange={(e) => setQuantity(+e.currentTarget.value)}
         ></input>
-        <button onClick={addToLine}>
-          Checkout
-        </button>
+        <button onClick={addToLine}>Checkout</button>
       </div>
       <div className="flex gap-2 mt-2">
         {lines &&
