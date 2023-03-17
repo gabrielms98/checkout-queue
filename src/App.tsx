@@ -3,23 +3,44 @@ import "./App.css";
 
 function App() {
   const lines: string[] = ["a", "b", "c", "d", "e"];
+  const lineSizes: number[] = Array.from({ length: lines.length }, () => 0);
+
+  const [quantity, setQuantity] = useState<number>(0);
+
   const [lineItems, setLineItems] = useState<number[][]>([
     [1],
-    [1, 5, 2],
-    [],
-    [],
-    [],
+    [2, 5, 2],
+    [3, 4],
+    [6, 1, 3, 5],
+    [4],
   ]);
 
+  function addToLine() {
+    if (quantity <= 0) return;
+
+    const copy = [...lineItems];
+
+    const minValue = Math.min(...lineSizes);
+    const lineIndex = lineSizes.findIndex((v) => v === minValue);
+
+    copy[lineIndex].push(quantity);
+
+    setLineItems(copy);
+  }
+
   useEffect(() => {
+    lineItems.forEach((line, i) => {
+      lineSizes[i] = line.reduce((acc, v) => acc + v, 0);
+    });
+
     const interval = setInterval(() => {
       const copy = [...lineItems];
       for (let i = 0; i < copy.length; i++) {
         if (!copy[i].length) continue;
 
-        copy[i][0]--;
+        if (--copy[i][0] === 0) copy[i].shift();
 
-        if (copy[i][0] === 0) copy[i].shift();
+        lineSizes[i] = copy[i].reduce((acc, v) => acc + v, 0);
       }
 
       setLineItems(copy);
@@ -31,8 +52,15 @@ function App() {
   return (
     <div className="w-screen h-screen flex flex-col justify-center items-center">
       <div>
-        <input type="number" placeholder="Enter quantity"></input>
-        <button>Checkout</button>
+        <input
+          type="number"
+          placeholder="Enter quantity"
+          value={quantity}
+          onChange={(e) => setQuantity(+e.currentTarget.value)}
+        ></input>
+        <button onClick={addToLine}>
+          Checkout
+        </button>
       </div>
       <div className="flex gap-2 mt-2">
         {lines &&
