@@ -11,7 +11,7 @@ function App() {
     [2, 5, 2],
     [3, 4],
     [6, 1, 3, 5],
-    [4],
+    [4, 5],
   ]);
 
   function addToLine() {
