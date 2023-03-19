@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 
 function App() {
@@ -37,6 +37,28 @@ function App() {
       );
     });
   }
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLineItems((prev) => {
+        const copy = [...prev];
+        for (const line of copy) {
+          if (!line.length) continue;
+
+          line[0] -= 1;
+
+          if (line[0] === 0) {
+            line.shift();
+            continue;
+          }
+        }
+
+        return copy;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="w-screen h-screen flex flex-col justify-center items-center">
